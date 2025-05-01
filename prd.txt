@@ -1,202 +1,46 @@
-# Product Requirements Document: Urlaub gegen Hand Application
+# Overview  
+# Urlaub gegen Hand Application
 
-## 1. Product Overview
 A Next.js 15-based web application connecting travelers with hosts who offer accommodations in exchange for help with various tasks. The platform facilitates "holiday for help" arrangements where travelers contribute their skills and time in exchange for stays, similar to the concept showcased on holiday4help.com.
 
-## 2. Technology Stack
-- **Frontend Framework**: Next.js 15
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Authentication**: NextAuth.js/Auth.js
-- **Database**: PostgreSQL with Prisma ORM
-- **State Management**: React Context API + SWR for data fetching
-- **Deployment**: Vercel
-- **Image Storage**: Cloudinary or AWS S3
-- **Maps Integration**: Google Maps API or Mapbox
-- **Notification System**: Server-sent events + optional email notifications
-
-## 3. Target Users
+The application serves two primary user groups:
 - **Hosts**: Property owners, farms, NGOs, project organizers needing assistance
 - **Helpers**: Travelers seeking budget-friendly accommodations while offering skills
 
-## 4. Core Features
+# Core Features  
 
-### 4.1 User Management
-- **Registration/Login System**
-  - Email/password authentication
-  - OAuth (Google, Facebook) options
-  - Email verification process
-  - Password reset functionality
-  - User role selection (host, helper, or both)
+## User Management
+- **Registration/Login System**: Email/password and OAuth authentication with email verification and user role selection
+- **User Profiles**: Comprehensive profiles with personal information, skills, availability calendars, and verification badges
 
-- **User Profiles**
-  - Personal information (name, age, languages, etc.)
-  - Profile photos
-  - Skills and experience
-  - References and reviews
-  - Verification badges (email, ID, social)
-  - Availability calendar
+## Listing Management
+- **Host Listings**: Detailed property listings with help requirements, work expectations, and availability
+- **Helper Profiles**: Skill-based profiles with category preferences, availability, and work hour preferences
 
-### 4.2 Listing Management
-- **Host Listings**
-  - Property details (location, accommodation type, amenities)
-  - Required help categories (matching holiday4help.com)
-  - Work hours expected and benefits offered
-  - Date range availability
-  - Photo gallery (up to 10 images)
-  - Description and house rules
-  - Language requirements
+## Search & Discovery
+- **Advanced Search**: Multi-parameter filtering by location, dates, categories, and languages
+- **Map-based Search**: Interactive map interface with clustering for discovering opportunities
+- **Recommendation Engine**: Intelligent matching based on skills and needs
 
-- **Helper Profiles**
-  - Skills and experience offered
-  - Preferred categories:
-    - Housesitting
-    - Landwirtschaft und Gartenarbeit (Agriculture/Gardening)
-    - Petsitting/Tierpflege (Pet Care)
-    - Nachhaltigkeit und Ökoprojekte (Sustainability/Eco Projects)
-    - NGOs Kinderhilfe, Natur- und Umweltschutz (NGOs Child Care, Nature Conservation)
-    - Bau- und Renovierungsarbeiten (Construction/Renovation)
-    - Haushaltshilfe (Household Help)
-    - Unterricht und Wissensvermittlung (Teaching/Knowledge Sharing)
-    - Kreative Tätigkeiten (Creative Activities)
-    - Tourismus (Tourism)
-    - Ehrenamtliche Arbeit (Volunteer Work)
-    - Sonstiges (Other)
-  - Availability dates
-  - Hours willing to work
-  - Travel preferences
+## Messaging System
+- **Real-time Chat**: Thread-based conversations with read receipts and media sharing
+- **Automated Messages**: Templates for requests, acceptances, and reminders
 
-### 4.3 Search & Discovery
-- **Advanced Search**
-  - Location-based search with radius filter
-  - Date range filtering
-  - Category filtering
-  - Accommodation type filtering
-  - Language filtering
-  - Keywords search
-  - Hours of work filtering
+## Booking System
+- **Request Management**: Structured request workflow with confirmation processes
+- **Stay Management**: Check-in/out confirmations and issue handling
 
-- **Map-based Search**
-  - Interactive map showing available listings
-  - Clustering for areas with multiple listings
-  - Filter controls on map view
-  - List/Map toggle view
+## Review System
+- **Two-way Reviews**: Star ratings and written testimonials for both parties
+- **Trust Indicators**: Performance metrics like response rates and completion rates
 
-- **Recommendation Engine**
-  - Skill-based matching for helpers
-  - Need-based matching for hosts
-  - Previous search history influence
+## Safety Features
+- **Verification Options**: Multi-level verification process for enhanced trust
+- **Reporting System**: Abuse reporting and safety guidelines
 
-### 4.4 Messaging System
-- **Real-time Chat**
-  - Thread-based conversations
-  - Message read receipts
-  - Image sharing capability
-  - Saved conversation history
-  - Notification system
+# User Experience  
 
-- **Automated Messages**
-  - Request templates
-  - Acceptance templates
-  - Rejection templates
-  - Reminder templates
-
-### 4.5 Booking System
-- **Request Management**
-  - Initial contact request
-  - Booking request with dates and details
-  - Host acceptance/rejection workflow
-  - Calendar blocking upon confirmation
-  - Cancellation policy and process
-
-- **Stay Management**
-  - Check-in/check-out confirmation
-  - Issue reporting during stay
-  - Extension requests
-  - Early termination handling
-
-### 4.6 Review System
-- **Two-way Reviews**
-  - Star ratings (1-5) across multiple categories
-  - Written testimonials
-  - Response capability for reviewed party
-  - Photo upload option for stay evidence
-  - Review moderation system
-
-- **Trust Indicators**
-  - Completion rate
-  - Response rate and time
-  - Overall rating
-  - Verification badges
-
-### 4.7 Safety Features
-- **Verification Options**
-  - Email verification (mandatory)
-  - Phone verification
-  - ID verification (optional premium feature)
-  - Social media connection
-  - Address verification for hosts
-
-- **Reporting System**
-  - User reporting mechanism
-  - Listing reporting for inaccuracies
-  - Emergency contact information
-  - Safety guidelines for both parties
-
-## 5. Technical Architecture
-
-### 5.1 Next.js App Router Structure
-```
-src/
-├── app/
-│   ├── api/           # API routes
-│   ├── (auth)/        # Authentication routes (login, register, etc.)
-│   ├── dashboard/     # User dashboard
-│   ├── listings/      # Listing pages
-│   ├── messages/      # Messaging system
-│   ├── profile/       # Profile management
-│   └── search/        # Search functionality
-├── components/        # Reusable React components
-├── lib/               # Utility functions and shared logic
-├── prisma/            # Database schema and migrations
-└── public/            # Static assets
-```
-
-### 5.2 Database Schema (High-level)
-- Users
-- Profiles (Host, Helper)
-- Listings
-- Categories
-- Messages
-- Bookings
-- Reviews
-- Verification
-
-### 5.3 API Endpoints
-- User management endpoints
-- Listing CRUD operations
-- Search and filtering
-- Messaging endpoints
-- Booking management
-- Review system
-- Admin functionality
-
-### 5.4 Authentication Flow
-- Registration with email verification
-- Login with JWT tokens
-- Password reset flow
-- OAuth provider integration
-- Session management with refresh tokens
-
-### 5.5 Responsive Design
-- Mobile-first approach
-- Breakpoints for tablet and desktop
-- PWA capabilities for mobile app-like experience
-- Touch-optimized interactions
-
-## 6. User Flows
-
-### 6.1 Host Flow
+## Host Flow
 1. Register and create profile
 2. Verify email and complete profile
 3. Create accommodation listing with requirements
@@ -208,7 +52,7 @@ src/
 9. Host helper and provide accommodation
 10. Review helper post-stay
 
-### 6.2 Helper Flow
+## Helper Flow
 1. Register and create profile
 2. Verify email and complete profile
 3. Search for suitable opportunities
@@ -220,50 +64,72 @@ src/
 9. Complete stay and tasks
 10. Review host post-stay
 
-## 7. Non-Functional Requirements
+# Technical Architecture  
 
-### 7.1 Performance
-- Page load time < 2 seconds
-- Time to interactive < 3 seconds
-- Server response time < 200ms
-- Support for 1000+ concurrent users
-- Database query optimization
-- Image optimization pipeline
+## Technology Stack
+- **Frontend Framework**: Next.js 15
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Authentication**: NextAuth.js/Auth.js
+- **Database**: PostgreSQL with Prisma ORM
+- **State Management**: React Context API + SWR for data fetching
+- **Deployment**: Vercel
+- **Image Storage**: Cloudinary or AWS S3
+- **Maps Integration**: Google Maps API or Mapbox
+- **Notification System**: Server-sent events + optional email notifications
 
-### 7.2 Security
-- HTTPS-only
-- XSS protection
-- CSRF protection
-- SQL injection prevention
-- Rate limiting for API endpoints
-- Data encryption at rest and in transit
-- GDPR compliance for EU users
+## Next.js App Router Structure
+```
+src/
+├── app/
+│   ├── api/           # API routes
+│   ├── (auth)/        # Authentication routes
+│   ├── dashboard/     # User dashboard
+│   ├── listings/      # Listing pages
+│   ├── messages/      # Messaging system
+│   ├── profile/       # Profile management
+│   └── search/        # Search functionality
+├── components/        # Reusable React components
+├── lib/               # Utility functions and shared logic
+├── prisma/            # Database schema and migrations
+└── public/            # Static assets
+```
 
-### 7.3 Accessibility
-- WCAG 2.1 AA compliance
-- Keyboard navigation support
-- Screen reader compatibility
-- Sufficient color contrast
-- Alt text for images
-- Semantic HTML structure
+## Database Schema (High-level)
+- Users
+- Profiles (Host, Helper)
+- Listings
+- Categories
+- Messages
+- Bookings
+- Reviews
+- Verification
 
-### 7.4 Internationalization
-- Multi-language support (initial: German, English)
-- Currency handling for potential future monetization
-- Date/time format localization
-- Right-to-left language support foundation
+## API Endpoints
+- User management endpoints
+- Listing CRUD operations
+- Search and filtering
+- Messaging endpoints
+- Booking management
+- Review system
+- Admin functionality
 
-### 7.5 SEO
-- Server-side rendering for critical pages
-- Meta tags optimization
-- Structured data implementation
-- Sitemap generation
-- Mobile-friendly design
-- Core Web Vitals optimization
+## Authentication Flow
+- Registration with email verification
+- Login with JWT tokens
+- Password reset flow
+- OAuth provider integration
+- Session management with refresh tokens
 
-## 8. Implementation Roadmap
+## Responsive Design
+- Mobile-first approach
+- Breakpoints for tablet and desktop
+- PWA capabilities for mobile app-like experience
+- Touch-optimized interactions
 
-### Phase 1: MVP (2 months)
+# Development Roadmap  
+
+## Phase 1: MVP
 - User registration and authentication
 - Basic profile creation
 - Simple listing creation and management
@@ -271,7 +137,7 @@ src/
 - Basic messaging system
 - Responsive web design
 
-### Phase 2: Core Features (2 months)
+## Phase 2: Core Features
 - Enhanced profiles and verification
 - Advanced search and filtering
 - Map-based search implementation
@@ -279,7 +145,7 @@ src/
 - Review system
 - Email notifications
 
-### Phase 3: Enhancement (2 months)
+## Phase 3: Enhancement
 - Real-time chat improvements
 - Trust and safety features
 - Analytics dashboard for admins
@@ -287,7 +153,7 @@ src/
 - Performance improvements
 - Automated testing implementation
 
-### Phase 4: Growth (3 months)
+## Phase 4: Growth
 - Mobile optimization
 - PWA capabilities
 - Additional languages
@@ -295,36 +161,100 @@ src/
 - API for potential future mobile apps
 - Community features (forums, groups)
 
-## 9. Success Metrics
+# Logical Dependency Chain
+
+## Foundation (Must be built first)
+1. Database schema and models (Prisma setup)
+2. Authentication system
+3. Basic user management
+4. Core API routes
+
+## User-Facing Features (Getting to visible functionality)
+1. User registration/login flows
+2. Profile creation for hosts and helpers
+3. Basic listing creation and management
+4. Simple search functionality
+5. Fundamental messaging system
+
+## Enhancement Sequence (Building upon core)
+1. Advanced search with filtering
+2. Map integration
+3. Complete booking flow
+4. Review system
+5. Verification and trust features
+
+## Final Capabilities (Completeness and polish)
+1. Real-time chat enhancements
+2. Performance optimizations
+3. Analytics and reporting
+4. Multi-language support
+5. PWA capabilities
+
+# Risks and Mitigations  
+
+## Database Scalability Issues
+- **Risk**: Performance degradation with growing user base
+- **Mitigation**: Implement proper indexing, connection pooling, and consider read replicas
+
+## Authentication Security Breaches
+- **Risk**: Unauthorized access and data theft
+- **Mitigation**: Regular security audits, keeping dependencies updated, implementing MFA
+
+## Performance Degradation
+- **Risk**: Slow page loads and poor user experience as app grows
+- **Mitigation**: CDN integration, edge caching, code splitting, image optimization
+
+## API Abuse and Scraping
+- **Risk**: Automated data harvesting and system abuse
+- **Mitigation**: Rate limiting, CAPTCHA for sensitive operations, API keys
+
+## Data Protection Compliance
+- **Risk**: GDPR and other regulatory violations
+- **Mitigation**: Privacy-by-design approach, data minimization, consent management
+
+# Appendix  
+
+## Non-Functional Requirements
+
+### Performance
+- Page load time < 2 seconds
+- Time to interactive < 3 seconds
+- Server response time < 200ms
+- Support for 1000+ concurrent users
+
+### Security
+- HTTPS-only
+- XSS protection
+- CSRF protection
+- SQL injection prevention
+- Rate limiting for API endpoints
+
+### Accessibility
+- WCAG 2.1 AA compliance
+- Keyboard navigation support
+- Screen reader compatibility
+- Sufficient color contrast
+
+### Internationalization
+- Multi-language support (initial: German, English)
+- Date/time format localization
+
+### SEO
+- Server-side rendering for critical pages
+- Meta tags optimization
+- Structured data implementation
+- Sitemap generation
+
+## Success Metrics
 - User growth rate (hosts and helpers)
 - Listing creation rate
 - Message response rate
 - Successful matches and completed stays
 - User retention (3-month, 6-month)
-- Session duration and engagement metrics
-- Conversion rate from visitor to registered user
 
-## 10. Future Considerations
+## Future Considerations
 - Native mobile applications
 - Premium subscription model
 - Verified status badges
-- Enhanced trust features
 - Integration with travel platforms
-- Community features and forums
-- Local experiences and activities marketplace
-
-## 11. Technical Risks and Mitigations
-- **Risk**: Database scalability issues
-  **Mitigation**: Implement proper indexing, connection pooling, and consider read replicas
-
-- **Risk**: Authentication security breaches
-  **Mitigation**: Regular security audits, keeping dependencies updated, implementing MFA
-
-- **Risk**: Performance degradation with growth
-  **Mitigation**: CDN integration, edge caching, code splitting, image optimization
-
-- **Risk**: API abuse and scraping
-  **Mitigation**: Rate limiting, CAPTCHA for sensitive operations, API keys
-
-- **Risk**: Data protection compliance
-  **Mitigation**: Privacy-by-design approach, data minimization, consent management 
+- Community features and forums 
