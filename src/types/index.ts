@@ -190,6 +190,7 @@ export interface Booking {
 export interface Message {
   id: string;
   bookingId?: string; // Optional: Link message to a booking context
+  conversationId: string; // Link message to a conversation thread
   senderId: string; // Foreign key to User
   receiverId: string; // Foreign key to User
   content: string;
@@ -225,4 +226,13 @@ export interface Verification {
   verifiedAt: Date;
   // Relationships
   user: User;
+}
+
+// Add Conversation type for messaging system
+export interface Conversation {
+  id: string;
+  participantIds: string[]; // User IDs participating in this conversation
+  lastMessageId?: string; // Reference to the most recent message
+  createdAt: Date;
+  updatedAt: Date;
 }
