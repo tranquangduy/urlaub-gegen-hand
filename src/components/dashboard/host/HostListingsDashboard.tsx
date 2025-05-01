@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { PlusCircle } from 'lucide-react';
 import { toast } from 'sonner'; // Assuming sonner for notifications
+import StatsCard from '@/components/dashboard/common/StatsCard';
+import { List, Eye, EyeOff } from 'lucide-react';
 
 interface HostListingsDashboardProps {
   hostId: string;
@@ -97,6 +99,15 @@ const HostListingsDashboard: React.FC<HostListingsDashboardProps> = ({
     }
   };
 
+  // Compute dashboard summary stats
+  const totalCount = listings.length;
+  const activeCount = listings.filter((l) => l.status === 'active').length;
+  const inactiveCount = listings.filter((l) => l.status !== 'active').length;
+  const activePercent =
+    totalCount > 0 ? Math.round((activeCount / totalCount) * 100) : 0;
+  const inactivePercent =
+    totalCount > 0 ? Math.round((inactiveCount / totalCount) * 100) : 0;
+
   if (loading) {
     // TODO: Add listings table skeleton loader
     return <p>Loading listings...</p>;
@@ -108,6 +119,24 @@ const HostListingsDashboard: React.FC<HostListingsDashboardProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* Dashboard summary cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <StatsCard title="Total Listings" value={totalCount} icon={<List />} />
+        <StatsCard
+          title="Active Listings"
+          value={activeCount}
+          icon={<Eye />}
+          trend="up"
+          trendValue={activePercent}
+        />
+        <StatsCard
+          title="Inactive Listings"
+          value={inactiveCount}
+          icon={<EyeOff />}
+          trend="down"
+          trendValue={inactivePercent}
+        />
+      </div>
       <div className="flex justify-end">
         <Button asChild>
           <Link href="/listings/new">
