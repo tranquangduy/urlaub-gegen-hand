@@ -19,7 +19,7 @@ The application serves two primary user groups:
 
 ## Search & Discovery
 - **Advanced Search**: Multi-parameter filtering by location, dates, categories, and languages
-- **Map-based Search**: Interactive map interface with clustering for discovering opportunities
+- **Map-based Search**: Simple location-based interface for discovering opportunities
 - **Recommendation Engine**: Intelligent matching based on skills and needs
 
 ## Messaging System
@@ -70,19 +70,19 @@ The application serves two primary user groups:
 - **Frontend Framework**: Next.js 15
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
-- **Authentication**: NextAuth.js/Auth.js
-- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: NextAuth.js/Auth.js with local storage
+- **Database**: Mock DB / localStorage for MVP phase
 - **State Management**: React Context API + SWR for data fetching
-- **Deployment**: Vercel
-- **Image Storage**: Cloudinary or AWS S3
-- **Maps Integration**: Google Maps API or Mapbox
-- **Notification System**: Server-sent events + optional email notifications
+- **Deployment**: Local development server / Vercel
+- **Image Storage**: Local file system for MVP
+- **Maps Integration**: Static location display for MVP (no external API)
+- **Notification System**: Simple alerts and browser notifications
 
 ## Next.js App Router Structure
 ```
 src/
 ├── app/
-│   ├── api/           # API routes
+│   ├── api/           # API routes (mock data)
 │   ├── (auth)/        # Authentication routes
 │   ├── dashboard/     # User dashboard
 │   ├── listings/      # Listing pages
@@ -91,11 +91,11 @@ src/
 │   └── search/        # Search functionality
 ├── components/        # Reusable React components
 ├── lib/               # Utility functions and shared logic
-├── prisma/            # Database schema and migrations
+├── mocks/             # Mock data and services
 └── public/            # Static assets
 ```
 
-## Database Schema (High-level)
+## Database Schema (High-level - Implemented as Mock Data)
 - Users
 - Profiles (Host, Helper)
 - Listings
@@ -106,128 +106,123 @@ src/
 - Verification
 
 ## API Endpoints
-- User management endpoints
-- Listing CRUD operations
-- Search and filtering
-- Messaging endpoints
-- Booking management
-- Review system
-- Admin functionality
+- User management endpoints (mock)
+- Listing CRUD operations (mock)
+- Search and filtering (mock)
+- Messaging endpoints (mock)
+- Booking management (mock)
+- Review system (mock)
+- Admin functionality (mock)
 
 ## Authentication Flow
-- Registration with email verification
-- Login with JWT tokens
-- Password reset flow
-- OAuth provider integration
-- Session management with refresh tokens
+- Simple email/password with localStorage
+- Basic session management
+- Mock email verification for MVP
 
 ## Responsive Design
 - Mobile-first approach
 - Breakpoints for tablet and desktop
-- PWA capabilities for mobile app-like experience
-- Touch-optimized interactions
+- Basic responsive design for MVP
 
 # Development Roadmap  
 
 ## Phase 1: MVP
-- User registration and authentication
+- User registration with localStorage persistence
 - Basic profile creation
-- Simple listing creation and management
-- Location-based search
-- Basic messaging system
+- Simple listing creation and management with mock data
+- Basic search functionality without external APIs
+- Simplified messaging system
 - Responsive web design
 
 ## Phase 2: Core Features
-- Enhanced profiles and verification
-- Advanced search and filtering
-- Map-based search implementation
-- Booking system implementation
+- Enhanced profiles
+- Advanced search and filtering with local data
+- Simple location-based search
+- Complete booking system implementation
 - Review system
-- Email notifications
+- Basic notification alerts
 
 ## Phase 3: Enhancement
+- Add actual backend database (PostgreSQL with Prisma)
 - Real-time chat improvements
 - Trust and safety features
 - Analytics dashboard for admins
 - SEO optimization
 - Performance improvements
-- Automated testing implementation
 
 ## Phase 4: Growth
+- External integrations (Google Maps, AWS S3, etc.)
 - Mobile optimization
 - PWA capabilities
 - Additional languages
 - Advanced recommendation engine
-- API for potential future mobile apps
 - Community features (forums, groups)
 
 # Logical Dependency Chain
 
 ## Foundation (Must be built first)
-1. Database schema and models (Prisma setup)
-2. Authentication system
+1. Mock data structures and services
+2. Basic authentication with localStorage
 3. Basic user management
-4. Core API routes
+4. Core mock API routes
 
 ## User-Facing Features (Getting to visible functionality)
-1. User registration/login flows
+1. User registration/login flows with localStorage
 2. Profile creation for hosts and helpers
 3. Basic listing creation and management
 4. Simple search functionality
-5. Fundamental messaging system
+5. Basic messaging system
 
 ## Enhancement Sequence (Building upon core)
-1. Advanced search with filtering
-2. Map integration
+1. Advanced search with filtering (local data)
+2. Simple location display
 3. Complete booking flow
 4. Review system
-5. Verification and trust features
+5. Basic verification features
 
-## Final Capabilities (Completeness and polish)
-1. Real-time chat enhancements
-2. Performance optimizations
+## Final Capabilities (For future phases after MVP)
+1. Database migration from localStorage to actual backend
+2. Real-time communication
 3. Analytics and reporting
-4. Multi-language support
-5. PWA capabilities
+4. External API integrations
+5. Advanced features
 
 # Risks and Mitigations  
 
-## Database Scalability Issues
-- **Risk**: Performance degradation with growing user base
-- **Mitigation**: Implement proper indexing, connection pooling, and consider read replicas
+## localStorage Limitations
+- **Risk**: Data persistence and storage limitations
+- **Mitigation**: Clear limits on data size, implement data purging, plan for database migration
 
-## Authentication Security Breaches
-- **Risk**: Unauthorized access and data theft
-- **Mitigation**: Regular security audits, keeping dependencies updated, implementing MFA
+## Authentication Simplification
+- **Risk**: Reduced security in MVP phase
+- **Mitigation**: Clear user communication, limit sensitive data collection, plan for proper auth implementation
 
-## Performance Degradation
-- **Risk**: Slow page loads and poor user experience as app grows
-- **Mitigation**: CDN integration, edge caching, code splitting, image optimization
+## Performance with Mock Data
+- **Risk**: UI performance issues with large mock datasets
+- **Mitigation**: Pagination, limited dataset size, efficient state management
 
-## API Abuse and Scraping
-- **Risk**: Automated data harvesting and system abuse
-- **Mitigation**: Rate limiting, CAPTCHA for sensitive operations, API keys
+## Offline Functionality
+- **Risk**: User data loss if localStorage is cleared
+- **Mitigation**: Data export options, clear warnings about localStorage limitations
 
-## Data Protection Compliance
-- **Risk**: GDPR and other regulatory violations
-- **Mitigation**: Privacy-by-design approach, data minimization, consent management
+## Feature Expectations
+- **Risk**: Users expecting full functionality in MVP
+- **Mitigation**: Clear labeling of MVP features, feedback collection for prioritization
 
 # Appendix  
 
 ## Non-Functional Requirements
 
 ### Performance
-- Page load time < 2 seconds
+- Page load time < 2 seconds even with localStorage
 - Time to interactive < 3 seconds
-- Server response time < 200ms
-- Support for 1000+ concurrent users
+- Smooth interactions despite mock backend
+- Support for demonstration with limited test users
 
 ### Security
-- HTTPS-only
-- XSS protection
-- CSRF protection
-- SQL injection prevention
-- Rate limiting for API endpoints
+- Basic security for MVP phase
+- Future planning for full security implementation
+- Clear communication about MVP limitations
 
 ### Accessibility
 - WCAG 2.1 AA compliance
@@ -236,25 +231,23 @@ src/
 - Sufficient color contrast
 
 ### Internationalization
-- Multi-language support (initial: German, English)
-- Date/time format localization
+- Single language for MVP (English)
+- Structure to support future language additions
 
 ### SEO
-- Server-side rendering for critical pages
-- Meta tags optimization
-- Structured data implementation
-- Sitemap generation
+- Basic meta tags
+- Simple structured data
+- Semantic HTML
 
 ## Success Metrics
-- User growth rate (hosts and helpers)
-- Listing creation rate
-- Message response rate
-- Successful matches and completed stays
-- User retention (3-month, 6-month)
+- MVP feature completion rate
+- Development velocity
+- User testing feedback
+- Identification of critical features for actual backend implementation
 
 ## Future Considerations
-- Native mobile applications
-- Premium subscription model
-- Verified status badges
-- Integration with travel platforms
-- Community features and forums 
+- Migration from localStorage to actual database
+- Implementation of external services (maps, storage, etc.)
+- Authentication enhancement
+- Real-time capabilities
+- Server-side rendering optimization 
