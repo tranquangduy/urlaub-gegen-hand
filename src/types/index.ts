@@ -203,6 +203,17 @@ export interface Message {
   booking?: Booking;
 }
 
+/**
+ * A response to a review by the reviewee or admin.
+ */
+export interface ReviewResponse {
+  id: string;
+  reviewId: string;
+  authorId: string;
+  comment: string;
+  createdAt: string;
+}
+
 export interface Review {
   id: string;
   bookingId: string; // Foreign key to Booking
@@ -213,9 +224,14 @@ export interface Review {
   photoUrl?: string; // Optional photo evidence
   createdAt: Date;
   // Relationships
-  booking: Booking;
-  reviewer: User;
-  reviewee: User;
+  booking?: Booking;
+  reviewer?: User;
+  reviewee?: User;
+  // Engagement and moderation
+  helpfulCount?: number;
+  notHelpfulCount?: number;
+  responses?: ReviewResponse[];
+  flagged?: boolean;
 }
 
 // Simple verification structure for MVP

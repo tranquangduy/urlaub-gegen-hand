@@ -5,10 +5,11 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { getBookingRequests, updateBookingRequest } from '@/lib/bookingStorage';
 import type { BookingRequest } from '@/types';
-import { getById } from '@/mocks/services';
+import { getById, getAll } from '@/mocks/services';
 import { formatDate, getUserDisplayName } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const BookingDetailPage: React.FC = () => {
   const params = useParams();
@@ -52,8 +53,25 @@ const BookingDetailPage: React.FC = () => {
     if (updated) setRequest(updated);
   };
 
+  // Check if current user has already submitted a review for this booking
+  const hasReviewed = getAll('reviews').some(
+    (r) => r.bookingId === bookingId && r.reviewerId === user.id
+  );
+
   return (
     <div className="container mx-auto p-4">
+      {request.status === 'completed' && !hasReviewed && (
+        <Alert className="mb-4">
+          <AlertTitle>Thank you for your stay!</AlertTitle>
+          <AlertDescription>
+            Would you like to{' '}
+            <Link href={`/bookings/${request.id}/review`} className="underline">
+              leave a review
+            </Link>
+            ?
+          </AlertDescription>
+        </Alert>
+      )}
       <h1 className="text-2xl font-bold mb-4">Booking Details</h1>
       <p>
         <strong>Listing:</strong>{' '}
@@ -135,6 +153,17 @@ const BookingDetailPage: React.FC = () => {
             className="text-blue-600 underline"
           >
             Message Host
+          </Link>
+        </div>
+      )}
+
+      {request.status === 'completed' && (
+        <div className="mt-4">
+          <Link
+            href={`/bookings/${request.id}/review`}
+            className="text-blue-600 underline"
+          >
+            Leave a Review
           </Link>
         </div>
       )}

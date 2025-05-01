@@ -62,6 +62,7 @@ const HostRequestsDashboard: React.FC<HostRequestsDashboardProps> = ({
             <th className="px-4 py-2 text-left">Dates</th>
             <th className="px-4 py-2 text-left">Purpose</th>
             <th className="px-4 py-2 text-left">Status</th>
+            <th className="px-4 py-2 text-left">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -86,6 +87,18 @@ const HostRequestsDashboard: React.FC<HostRequestsDashboardProps> = ({
                 </td>
                 <td className="px-4 py-2 max-w-xs truncate">{req.purpose}</td>
                 <td className="px-4 py-2 capitalize">{req.status}</td>
+                <td className="px-4 py-2">
+                  {req.status === 'completed' ? (
+                    <Link
+                      href={`/bookings/${req.id}/review`}
+                      className="text-blue-600 underline"
+                    >
+                      Leave Review
+                    </Link>
+                  ) : (
+                    '—'
+                  )}
+                </td>
               </tr>
             );
           })}

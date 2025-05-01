@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,10 @@ import {
   Users,
   Wrench,
   Clock,
+  Star,
 } from 'lucide-react';
+import { getReviewsForUser, update } from '@/mocks/services';
+import type { Review } from '@/types';
 
 export default function ProfileView() {
   const { user } = useAuth();
@@ -42,6 +45,70 @@ export default function ProfileView() {
   };
 
   const [activeTab, setActiveTab] = useState(getDefaultTab());
+  const [reviews, setReviews] = useState<Review[]>([]);
+
+  // State for review engagement and moderation
+  const [respondingReviewId, setRespondingReviewId] = useState<string | null>(
+    null
+  );
+  const [responseComment, setResponseComment] = useState<string>('');
+
+  useEffect(() => {
+    if (activeTab === 'reviews' && user) {
+      setReviews(getReviewsForUser(user.id));
+    }
+  }, [activeTab, user]);
+
+  // Handle voting on reviews
+  const handleVote = (reviewId: string, type: 'helpful' | 'notHelpful') => {
+    const review = reviews.find((r) => r.id === reviewId);
+    if (!review) return;
+    // Determine which count to update
+    const countField: 'helpfulCount' | 'notHelpfulCount' =
+      type === 'helpful' ? 'helpfulCount' : 'notHelpfulCount';
+    // Use optional chaining and default to 0
+    const currentCount = review[countField] ?? 0;
+    const newCount = currentCount + 1;
+    update('reviews', reviewId, { [countField]: newCount });
+    setReviews((prev) =>
+      prev.map((r) =>
+        r.id === reviewId ? { ...r, [countField]: newCount } : r
+      )
+    );
+  };
+
+  // Handle flagging reviews
+  const handleFlag = (reviewId: string) => {
+    update('reviews', reviewId, { flagged: true });
+    setReviews((prev) =>
+      prev.map((r) => (r.id === reviewId ? { ...r, flagged: true } : r))
+    );
+  };
+
+  // Handle submitting a response to a review
+  const handleResponseSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return; // ensure user exists
+    if (!respondingReviewId || !responseComment.trim()) return;
+    const review = reviews.find((r) => r.id === respondingReviewId);
+    if (!review) return;
+    const newResponse = {
+      id: crypto.randomUUID(),
+      reviewId: respondingReviewId,
+      authorId: user.id,
+      comment: responseComment.trim(),
+      createdAt: new Date().toISOString(),
+    };
+    const updatedResponses = [...(review.responses || []), newResponse];
+    update('reviews', respondingReviewId, { responses: updatedResponses });
+    setReviews((prev) =>
+      prev.map((r) =>
+        r.id === respondingReviewId ? { ...r, responses: updatedResponses } : r
+      )
+    );
+    setResponseComment('');
+    setRespondingReviewId(null);
+  };
 
   // Show loading state
   if (isLoading) {
@@ -252,11 +319,11 @@ export default function ProfileView() {
           style={{
             gridTemplateColumns: `repeat(${
               user?.roles?.includes('both')
-                ? 3
+                ? 4
                 : user?.roles?.includes('host') ||
                   user?.roles?.includes('helper')
-                ? 2
-                : 1
+                ? 3
+                : 2
             }, 1fr)`,
           }}
         >
@@ -267,6 +334,7 @@ export default function ProfileView() {
           {user?.roles?.includes('helper') && (
             <TabsTrigger value="helper">Helper Profile</TabsTrigger>
           )}
+          <TabsTrigger value="reviews">Reviews</TabsTrigger>
         </TabsList>
 
         {/* Basic Info Tab */}
@@ -846,6 +914,129 @@ export default function ProfileView() {
             </div>
           </TabsContent>
         )}
+
+        {/* Reviews Tab */}
+        <TabsContent value="reviews">
+          {reviews.length > 0 ? (
+            <div className="space-y-4">
+              <div className="mb-4">
+                Average Rating:{' '}
+                {Array.from({
+                  length: Math.round(
+                    reviews.reduce((sum, r) => sum + r.rating, 0) /
+                      reviews.length
+                  ),
+                }).map((_, i) => (
+                  <Star key={i} className="h-4 w-4 text-yellow-500 inline" />
+                ))}
+              </div>
+              {reviews.map((r) => {
+                const reviewerName = r.reviewer
+                  ? getUserDisplayName(
+                      r.reviewer.name || '',
+                      '',
+                      r.reviewer.name
+                    )
+                  : 'Anonymous';
+                return (
+                  <div key={r.id} className="p-4 border rounded">
+                    <div className="flex items-center mb-2">
+                      <span className="font-medium mr-2">{reviewerName}</span>
+                      {Array.from({ length: r.rating }).map((_, i) => (
+                        <Star
+                          key={i}
+                          className="h-4 w-4 text-yellow-500 inline"
+                        />
+                      ))}
+                    </div>
+                    {r.comment && (
+                      <p className="text-sm text-muted-foreground">
+                        {r.comment}
+                      </p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">
+                      {formatDate(new Date(r.createdAt))}
+                    </p>
+                    {/* Engagement & Moderation Actions */}
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => handleVote(r.id, 'helpful')}
+                      >
+                        👍 Helpful {r.helpfulCount ?? 0}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => handleVote(r.id, 'notHelpful')}
+                      >
+                        👎 Not Helpful {r.notHelpfulCount ?? 0}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => handleFlag(r.id)}
+                      >
+                        🚩 Flag
+                      </Button>
+                      {r.revieweeId === user?.id && !respondingReviewId && (
+                        <Button
+                          variant="outline"
+                          onClick={() => setRespondingReviewId(r.id)}
+                        >
+                          💬 Respond
+                        </Button>
+                      )}
+                    </div>
+                    {/* Response Form */}
+                    {respondingReviewId === r.id && (
+                      <form onSubmit={handleResponseSubmit} className="mt-2">
+                        <textarea
+                          value={responseComment}
+                          onChange={(e) => setResponseComment(e.target.value)}
+                          className="w-full p-2 border rounded"
+                          placeholder="Write your response..."
+                        />
+                        <div className="flex gap-2 mt-2">
+                          <Button type="submit">Submit</Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => setRespondingReviewId(null)}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </form>
+                    )}
+                    {/* Display Responses */}
+                    {r.responses && r.responses.length > 0 && (
+                      <div className="mt-4 ml-4 border-l pl-4 space-y-4">
+                        {r.responses.map((resp) => (
+                          <div key={resp.id}>
+                            <p className="text-sm font-medium">Response:</p>
+                            <p className="text-sm">{resp.comment}</p>
+                            <p className="text-xs text-gray-500">
+                              {formatDate(new Date(resp.createdAt))}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {/* Flagged Alert */}
+                    {r.flagged && (
+                      <Alert variant="destructive" className="mt-4">
+                        <AlertTitle>Flagged</AlertTitle>
+                        <AlertDescription>
+                          This review has been flagged for moderation.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p>No reviews yet.</p>
+          )}
+        </TabsContent>
       </Tabs>
     </div>
   );
