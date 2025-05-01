@@ -27,70 +27,89 @@ export function calculateProfileCompletion(
   profile: Partial<Profile>,
   userRoles: UserRole[] = []
 ): number {
+  if (!profile) return 0;
+
   const hasRole = (role: UserRole) =>
     userRoles.includes(role) || userRoles.includes('both');
 
   const isHost = hasRole('host');
   const isHelper = hasRole('helper');
 
-  // Required fields for all users
-  const requiredFields = [
-    !!profile.bio,
-    !!profile.profilePictureUrl,
-    !!profile.languages?.length,
+  // Define weights for different sections (adjust as needed)
+  const weights = {
+    basic: 4,
+    address: 1,
+    host: 3,
+    helper: 3, // Includes skills
+  };
+
+  // Fields for each section
+  const basicFields = [
     !!profile.firstName,
     !!profile.lastName,
-  ];
-
-  // Count personal info fields
-  const personalInfoFields = [
+    !!profile.bio,
+    !!profile.profilePictureUrl, // Consider adding placeholder check?
+    !!profile.languages?.length,
     !!profile.dateOfBirth,
     !!profile.gender,
-    !!profile.phoneNumber,
-    !!profile.address?.city,
-    !!profile.address?.country,
   ];
 
-  // Host-specific fields
+  const addressFields = [
+    !!profile.address?.city,
+    !!profile.address?.country,
+    // Add street, state, postalCode if deemed important
+  ];
+
   const hostFields = isHost
     ? [
         !!profile.hostingExperience,
         !!profile.propertyDetails?.propertyType,
-        !!profile.propertyDetails?.numberOfRooms,
-        !!profile.propertyDetails?.maxGuests,
-        !!profile.propertyDetails?.amenities?.length,
-        !!profile.hostingPreferences?.minStayDuration,
-        !!profile.hostingPreferences?.maxStayDuration,
+        // Add more host-specific fields if needed
       ]
     : [];
 
-  // Helper-specific fields
   const helperFields = isHelper
     ? [
-        !!profile.skills?.length,
-        !!profile.preferredCategories?.length,
-        !!profile.availabilityStartDate,
-        !!profile.availabilityEndDate,
-        !!profile.hoursPerWeek,
         !!profile.helperExperience,
-        !!profile.emergencyContact?.name,
-        !!profile.emergencyContact?.phoneNumber,
+        !!profile.skills?.length, // Include skills check
+        !!profile.availabilityStartDate, // Or a combined availability check
+        // Add more helper-specific fields if needed
       ]
     : [];
 
-  // Combine all applicable fields
-  const allFields = [
-    ...requiredFields,
-    ...personalInfoFields,
-    ...hostFields,
-    ...helperFields,
-  ];
+  // Calculate filled fields for each section
+  const filledBasic = basicFields.filter(Boolean).length;
+  const filledAddress = addressFields.filter(Boolean).length;
+  const filledHost = hostFields.filter(Boolean).length;
+  const filledHelper = helperFields.filter(Boolean).length;
+
+  // Calculate weighted completion score
+  let totalScore = 0;
+  let maxScore = 0;
+
+  if (basicFields.length > 0) {
+    totalScore += (filledBasic / basicFields.length) * weights.basic;
+    maxScore += weights.basic;
+  }
+  if (addressFields.length > 0) {
+    totalScore += (filledAddress / addressFields.length) * weights.address;
+    maxScore += weights.address;
+  }
+  if (isHost && hostFields.length > 0) {
+    totalScore += (filledHost / hostFields.length) * weights.host;
+    maxScore += weights.host;
+  }
+  if (isHelper && helperFields.length > 0) {
+    totalScore += (filledHelper / helperFields.length) * weights.helper;
+    maxScore += weights.helper;
+  }
 
   // Calculate percentage
-  const filledFields = allFields.filter(Boolean).length;
-  const totalFields = allFields.length;
+  if (maxScore === 0) return 0;
+  const percentage = Math.round((totalScore / maxScore) * 100);
 
-  return Math.round((filledFields / totalFields) * 100);
+  // Ensure percentage doesn't exceed 100
+  return Math.min(percentage, 100);
 }
 
 /**

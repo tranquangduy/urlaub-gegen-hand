@@ -1,17 +1,12 @@
-'use client';
-
-import { ProfileProvider } from '@/contexts/ProfileContext';
+import { Metadata } from 'next';
 import ProfilePage from '@/components/profile/ProfilePage';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
-export default function Profile() {
-  return (
-    <ProtectedRoute>
-      <ProfileProvider>
-        <div className="min-h-screen bg-gray-50">
-          <ProfilePage />
-        </div>
-      </ProfileProvider>
-    </ProtectedRoute>
-  );
+export const metadata: Metadata = {
+  title: 'My Profile | Urlaub gegen Hand',
+  description:
+    'View and manage your user profile including personal information, skills, and preferences.',
+};
+
+export default function ProfileRoute() {
+  return <ProfilePage mode="view" />;
 }
