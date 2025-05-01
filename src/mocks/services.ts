@@ -171,7 +171,16 @@ export const getAll = <T extends EntityType>(
 
     if (!jsonData) {
       // Initialize if not found
-      localStorage.setItem(storageKey, JSON.stringify([]));
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify([
+          {
+            email: 'admin@admin.de',
+            passwordHash: 'admin123',
+            id: '1',
+          },
+        ])
+      );
       return [];
     }
 
@@ -345,9 +354,9 @@ export const filter = <T extends EntityType>(
  */
 export const getUserByEmail = (email: string): User | null => {
   if (typeof window === 'undefined') return null;
-
   try {
     const users = getAll('users');
+    console.log(users.find((user) => user.email === email));
     return users.find((user) => user.email === email) || null;
   } catch (error) {
     console.error(`Error retrieving user by email ${email}:`, error);

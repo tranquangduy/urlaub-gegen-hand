@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   User,
   Profile,
@@ -5,7 +6,6 @@ import {
   Booking,
   Message,
   Review,
-  Verification,
   Category,
   CategorySlug,
   UserRole,
@@ -19,7 +19,6 @@ import {
   update,
   remove,
   getUserByEmail,
-  getListingsWithHosts,
   getBookingsWithDetails,
   getMessagesForConversation,
   getPaginated,
@@ -146,6 +145,7 @@ export const apiLogin = async (
 
     // Find the user
     const user = getUserByEmail(email);
+
     if (!user) {
       return createApiResponse(
         null as any,

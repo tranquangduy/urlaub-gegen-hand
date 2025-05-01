@@ -87,6 +87,7 @@ export const ProfileProvider = ({ children }: ProfileProviderProps) => {
               response.data,
               user.roles
             );
+            console.log(completion);
 
             setProfileState({
               profile: response.data,
@@ -132,6 +133,7 @@ export const ProfileProvider = ({ children }: ProfileProviderProps) => {
     try {
       setProfileState((prev) => ({ ...prev, isLoading: true }));
       const response = await api.getProfile(user.profileId);
+      console.log(response);
 
       if (response.success && response.data) {
         const completion = calculateProfileCompletion(

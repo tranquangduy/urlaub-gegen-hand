@@ -155,6 +155,7 @@ export interface Listing {
   photos?: string[]; // URLs to photos
   houseRules?: string;
   requiredLanguages?: string[];
+  status: 'active' | 'inactive';
   createdAt: Date;
   updatedAt: Date;
   // Relationships

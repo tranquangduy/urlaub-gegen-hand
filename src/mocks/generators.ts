@@ -64,6 +64,7 @@ let bookingIdCounter = 1;
 let messageIdCounter = 1;
 let reviewIdCounter = 1;
 let verificationIdCounter = 1;
+let categoryIdCounter = 1;
 
 export function generateMockUser(overrides: Partial<User> = {}): User {
   const id = `user_${userIdCounter++}`;
@@ -149,6 +150,7 @@ export function generateMockCategory(slug: CategorySlug): Category {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
   return {
+    id: `category_${categoryIdCounter++}`,
     slug,
     name,
     description: faker.lorem.sentence(),
@@ -205,6 +207,8 @@ export function generateMockListing(
     createdAt,
     updatedAt: faker.date.between({ from: createdAt, to: new Date() }),
     host: {} as User, // Placeholder
+    bookings: [] as Booking[], // Initialize bookings array
+    status: faker.helpers.arrayElement(['active', 'inactive']), // Added status
     ...overrides,
   };
 }

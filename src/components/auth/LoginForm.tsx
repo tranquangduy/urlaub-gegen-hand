@@ -30,7 +30,6 @@ export default function LoginForm() {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
-
     try {
       const success = await login(email, password);
       if (success) {

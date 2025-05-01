@@ -3,80 +3,131 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Listing } from '@/types';
-import { api } from '@/mocks/api';
+// Use specific functions from mock services
+import {
+  getById,
+  create as createListing,
+  update as updateListing,
+} from '@/mocks/services';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle, CheckCircle } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation'; // Added useParams
+import { toast } from 'sonner';
 
-// Import step components (will be created next)
-// import ListingFormStep1 from './ListingFormStep1';
-// import ListingFormStep2 from './ListingFormStep2';
-// import ListingFormStep3 from './ListingFormStep3';
-// import ListingFormStep4 from './ListingFormStep4';
-// import ListingFormStep5 from './ListingFormStep5';
+// Import step components
+import ListingFormStep1 from './ListingFormStep1';
+import ListingFormStep2 from './ListingFormStep2';
+import ListingFormStep3 from './ListingFormStep3';
+import ListingFormStep4 from './ListingFormStep4';
+import ListingFormStep5 from './ListingFormStep5';
 
 const TOTAL_STEPS = 5;
-const LOCAL_STORAGE_KEY = 'listing_form_draft';
+const LOCAL_STORAGE_KEY_PREFIX = 'listing_form_draft_'; // Use prefix for uniqueness
 
-// Initial form state type (will expand as steps are built)
-type ListingFormData = Partial<Listing>; // Start with Listing type
+// Initial form state type
+type ListingFormData = Partial<Listing>;
 
-export default function ListingForm() {
+// Props for the form, including optional listingId for editing
+interface ListingFormProps {
+  listingId?: string;
+}
+
+export default function ListingForm({ listingId }: ListingFormProps) {
   const { user } = useAuth();
   const router = useRouter();
+  // Get listingId from params if not passed as prop (e.g., for /listings/edit/[id] route)
+  const params = useParams();
+  const editListingId = listingId || (params.id as string); // Use prop first, then param
+  const isEditing = !!editListingId;
+
+  const localStorageKey = `${LOCAL_STORAGE_KEY_PREFIX}${
+    editListingId || 'new'
+  }`;
+
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<ListingFormData>({});
+  const [initialLoading, setInitialLoading] = useState(isEditing); // Only load initially if editing
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  // Load draft from localStorage on mount
+  // Fetch existing data if editing
   useEffect(() => {
-    const draft = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (draft) {
+    if (isEditing && editListingId) {
+      setInitialLoading(true);
       try {
-        const parsedDraft = JSON.parse(draft);
-        // TODO: Add validation/migration logic if draft structure changes
-        setFormData(parsedDraft);
-        // Optionally restore step? Needs more logic.
-        // setCurrentStep(parsedDraft.lastStep || 1);
+        setTimeout(() => {
+          // Simulate fetch
+          const existingListing = getById('listings', editListingId);
+          if (existingListing) {
+            // Check if draft exists and is newer? For now, overwrite with DB data
+            setFormData(existingListing);
+          } else {
+            toast.error('Listing not found for editing.');
+            // router.push('/dashboard/host/listings'); // Redirect if not found
+          }
+          setInitialLoading(false);
+        }, 300);
       } catch (err) {
-        console.error('Error parsing listing draft:', err);
-        localStorage.removeItem(LOCAL_STORAGE_KEY); // Clear invalid draft
+        console.error('Error fetching listing for edit:', err);
+        toast.error('Failed to load listing data for editing.');
+        setInitialLoading(false);
       }
     }
-  }, []);
+  }, [isEditing, editListingId]);
+
+  // Load draft from localStorage on mount (only if NOT editing or after initial load)
+  useEffect(() => {
+    if (!isEditing || !initialLoading) {
+      // Load draft for new or after initial edit load finishes
+      const draft = localStorage.getItem(localStorageKey);
+      if (draft) {
+        try {
+          const parsedDraft = JSON.parse(draft);
+          // Only set draft if it differs from initially loaded data (or if creating new)
+          if (
+            !isEditing ||
+            JSON.stringify(parsedDraft) !== JSON.stringify(formData)
+          ) {
+            setFormData(parsedDraft);
+          }
+        } catch (err) {
+          console.error('Error parsing listing draft:', err);
+          localStorage.removeItem(localStorageKey);
+        }
+      }
+    }
+  }, [isEditing, initialLoading, localStorageKey, formData]); // Add formData dependency
 
   // Save draft to localStorage on formData change
   useEffect(() => {
-    if (Object.keys(formData).length > 0) {
+    // Avoid saving during initial load or if formData is empty
+    if (!initialLoading && Object.keys(formData).length > 0) {
       try {
-        // Add metadata like last updated timestamp or step?
-        const draftToSave = { ...formData /*, lastStep: currentStep */ };
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(draftToSave));
+        const draftToSave = { ...formData };
+        localStorage.setItem(localStorageKey, JSON.stringify(draftToSave));
       } catch (err) {
-        console.error('Error saving listing draft:', err); // Handle potential quota errors
+        console.error('Error saving listing draft:', err);
+        toast.warning('Could not save draft. Storage might be full.');
       }
     }
-  }, [formData]);
+  }, [formData, initialLoading, localStorageKey]);
 
   const handleNext = async () => {
     // TODO: Implement validation for the current step
-    const isValid = true; // Placeholder
-    setErrors({}); // Clear previous errors
+    const isValid = true;
+    setErrors({});
 
     if (isValid) {
       if (currentStep < TOTAL_STEPS) {
         setCurrentStep(currentStep + 1);
       } else {
-        // Final step - submit the form
         await handleSubmit();
       }
     } else {
-      // TODO: Set errors based on validation result
       // setErrors(validationErrors);
     }
   };
@@ -93,7 +144,7 @@ export default function ListingForm() {
 
   const handleSubmit = async () => {
     if (!user) {
-      setSubmitError('You must be logged in to create a listing.');
+      setSubmitError('You must be logged in to create or update a listing.');
       return;
     }
 
@@ -101,69 +152,129 @@ export default function ListingForm() {
     setSubmitError(null);
     setSubmitSuccess(false);
 
+    // Prepare data (similar logic, but ensure all fields are present for update)
+    const listingDataForApi: Partial<Listing> = {
+      ...formData, // Start with current form data
+      title: formData.title || '', // Ensure required fields have defaults
+      description: formData.description || '',
+      location: formData.location || { address: '', city: '', country: '' },
+      accommodationType: formData.accommodationType || 'other',
+      requiredHelpCategories: formData.requiredHelpCategories || [],
+      workHoursPerWeek: formData.workHoursPerWeek || 0,
+      availabilityStartDate: formData.availabilityStartDate || new Date(),
+      availabilityEndDate: formData.availabilityEndDate || new Date(),
+      status: formData.status || 'inactive', // Default status if needed
+      // Explicitly exclude fields managed by backend/context
+      id: undefined,
+      createdAt: undefined,
+      updatedAt: undefined,
+      host: undefined,
+      bookings: undefined,
+      hostId: isEditing ? undefined : user.id, // Set hostId only when creating
+    };
+
+    // Remove undefined keys before sending to mock API if necessary
+    Object.keys(listingDataForApi).forEach(
+      (key) =>
+        listingDataForApi[key as keyof typeof listingDataForApi] ===
+          undefined &&
+        delete listingDataForApi[key as keyof typeof listingDataForApi]
+    );
+
     try {
-      // Final validation of the complete formData
-      // Assuming formData holds all necessary fields collected through steps
-      const listingDataForApi: Partial<
-        Omit<
-          Listing,
-          'id' | 'createdAt' | 'updatedAt' | 'host' | 'bookings' | 'hostId'
-        >
-      > = {
-        title: formData.title || '',
-        description: formData.description || '',
-        location: {
-          address: formData.location?.address || '',
-          city: formData.location?.city || '',
-          country: formData.location?.country || '',
-          // Consider adding state, postalCode, lat, long later
-        },
-        accommodationType: formData.accommodationType || 'other',
-        amenities: formData.amenities || [],
-        requiredHelpCategories: formData.requiredHelpCategories || [],
-        workHoursPerWeek: formData.workHoursPerWeek || 0,
-        benefitsOffered: formData.benefitsOffered || [],
-        availabilityStartDate: formData.availabilityStartDate || new Date(), // Provide default if needed
-        availabilityEndDate: formData.availabilityEndDate || new Date(), // Provide default if needed
-        photos: formData.photos || [],
-        houseRules: formData.houseRules || '',
-        requiredLanguages: formData.requiredLanguages || [],
-      };
+      let response;
+      if (isEditing && editListingId) {
+        // Update existing listing
+        response = await updateListing(
+          'listings',
+          editListingId,
+          listingDataForApi
+        );
+      } else {
+        // Create new listing
+        response = await createListing('listings', {
+          ...listingDataForApi,
+          id: `listing_${Date.now()}_${Math.random().toString(16).slice(2)}`, // Generate new ID
+          hostId: user.id,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          status: listingDataForApi.status || 'inactive', // Ensure status is set
+        } as Listing); // Type assertion needed as we added required fields
+      }
 
-      // Call API with hostId and the prepared data
-      const response = await api.createListing(user.id, listingDataForApi);
+      const resultListing = response; // update/create return the object in mock service
 
-      if (response.success && response.data) {
+      if (resultListing) {
+        // Check if operation returned the listing
         setSubmitSuccess(true);
-        localStorage.removeItem(LOCAL_STORAGE_KEY); // Clear draft on success
+        localStorage.removeItem(localStorageKey); // Clear draft on success
+        toast.success(
+          `Listing ${isEditing ? 'updated' : 'created'} successfully!`
+        );
         setTimeout(() => {
-          // Redirect to the newly created listing or a listings page
-          router.push(`/listings/${response.data?.id || ''}`);
+          // Redirect to the listing detail page or dashboard
+          router.push(
+            `/listings/${isEditing ? editListingId : resultListing.id}`
+          );
         }, 1500);
       } else {
-        setSubmitError(response.error || 'Failed to create listing.');
+        setSubmitError(`Failed to ${isEditing ? 'update' : 'create'} listing.`);
+        toast.error(`Failed to ${isEditing ? 'update' : 'create'} listing.`);
       }
     } catch (error) {
       console.error('Listing submission error:', error);
       setSubmitError('An unexpected error occurred.');
+      toast.error('An unexpected error occurred during submission.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const renderStep = () => {
-    // TODO: Replace with actual step components
+    if (initialLoading) {
+      return <p>Loading listing data...</p>; // Add a proper skeleton later
+    }
     switch (currentStep) {
       case 1:
-        return <div>Step 1: Basic Info (Component Placeholder)</div>; // <ListingFormStep1 data={formData} updateData={updateFormData} errors={errors} />;
+        return (
+          <ListingFormStep1
+            data={formData}
+            updateData={updateFormData}
+            errors={errors}
+          />
+        );
       case 2:
-        return <div>Step 2: Amenities (Component Placeholder)</div>; // <ListingFormStep2 data={formData} updateData={updateFormData} errors={errors} />;
+        return (
+          <ListingFormStep2
+            data={formData}
+            updateData={updateFormData}
+            errors={errors}
+          />
+        );
       case 3:
-        return <div>Step 3: Photos (Component Placeholder)</div>; // <ListingFormStep3 data={formData} updateData={updateFormData} errors={errors} />;
+        return (
+          <ListingFormStep3
+            data={formData}
+            updateData={updateFormData}
+            errors={errors}
+          />
+        );
       case 4:
-        return <div>Step 4: Work Requirements (Component Placeholder)</div>; // <ListingFormStep4 data={formData} updateData={updateFormData} errors={errors} />;
+        return (
+          <ListingFormStep4
+            data={formData}
+            updateData={updateFormData}
+            errors={errors}
+          />
+        );
       case 5:
-        return <div>Step 5: Availability (Component Placeholder)</div>; // <ListingFormStep5 data={formData} updateData={updateFormData} errors={errors} />;
+        return (
+          <ListingFormStep5
+            data={formData}
+            updateData={updateFormData}
+            errors={errors}
+          />
+        );
       default:
         return <div>Invalid Step</div>;
     }
@@ -171,7 +282,9 @@ export default function ListingForm() {
 
   return (
     <div className="max-w-3xl mx-auto p-4 md:p-8">
-      <h1 className="text-3xl font-bold mb-6">Create New Listing</h1>
+      <h1 className="text-3xl font-bold mb-6">
+        {isEditing ? 'Edit Listing' : 'Create New Listing'}
+      </h1>
 
       {/* Progress Bar */}
       <div className="mb-8">
@@ -193,7 +306,8 @@ export default function ListingForm() {
           <CheckCircle className="h-4 w-4" />
           <AlertTitle>Success!</AlertTitle>
           <AlertDescription>
-            Listing created successfully! Redirecting...
+            Listing {isEditing ? 'updated' : 'created'} successfully!
+            Redirecting...
           </AlertDescription>
         </Alert>
       )}
@@ -206,32 +320,27 @@ export default function ListingForm() {
       )}
 
       {/* Render Current Step */}
-      <div className="mb-8 min-h-[300px]">
-        {' '}
-        {/* Added min-height */}
-        {renderStep()}
-      </div>
+      <div className="mb-8 min-h-[300px]">{renderStep()}</div>
 
       {/* Navigation Buttons */}
       <div className="flex justify-between mt-8">
         <Button
           onClick={handlePrevious}
-          disabled={currentStep === 1 || isSubmitting}
+          disabled={currentStep === 1 || isSubmitting || initialLoading}
           variant="outline"
         >
           Previous
         </Button>
-        <Button onClick={handleNext} disabled={isSubmitting}>
-          {isSubmitting ? (
-            <>
-              <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
-              {currentStep === TOTAL_STEPS ? 'Submitting...' : 'Saving...'}
-            </>
-          ) : currentStep === TOTAL_STEPS ? (
-            'Submit Listing'
-          ) : (
-            'Next'
-          )}
+        <Button onClick={handleNext} disabled={isSubmitting || initialLoading}>
+          {isSubmitting
+            ? currentStep === TOTAL_STEPS
+              ? 'Submitting...'
+              : 'Saving...'
+            : currentStep === TOTAL_STEPS
+            ? isEditing
+              ? 'Update Listing'
+              : 'Create Listing'
+            : 'Next'}
         </Button>
       </div>
     </div>
