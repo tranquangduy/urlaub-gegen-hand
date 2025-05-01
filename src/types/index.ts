@@ -246,6 +246,8 @@ export interface BookingRequest {
   purpose: string;
   specialRequirements?: string;
   status: BookingStatus;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
+  checkInAt?: string;
+  checkOutAt?: string;
 }

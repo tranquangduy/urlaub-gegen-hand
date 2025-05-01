@@ -236,7 +236,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ initialParams, onSearch }) => {
                   <SelectValue placeholder="Any Category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any Category</SelectItem>
+                  <SelectItem value="_">Any Category</SelectItem>
                   {ALL_CATEGORY_SLUGS.map((slug) => (
                     <SelectItem key={slug} value={slug}>
                       {slug
