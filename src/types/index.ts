@@ -236,3 +236,16 @@ export interface Conversation {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface BookingRequest {
+  id: string;
+  listingId: string;
+  helperId: string;
+  startDate: string;
+  endDate: string;
+  purpose: string;
+  specialRequirements?: string;
+  status: BookingStatus;
+  createdAt: Date;
+  updatedAt: Date;
+}

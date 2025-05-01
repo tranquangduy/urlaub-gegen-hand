@@ -4,6 +4,7 @@ import React from 'react';
 import { useParams } from 'next/navigation';
 import { getById } from '@/mocks/services';
 import { Listing, Profile } from '@/types';
+import Link from 'next/link';
 // import ListingDetailView from '@/components/listings/ListingDetailView';
 // import { Container } from '@/components/ui/container';
 
@@ -90,6 +91,14 @@ const ListingDetailPage = () => {
   return (
     <Container>
       <ListingDetailView listing={listing} hostProfile={hostProfile} />
+      <div className="mt-4">
+        <Link
+          href={`/bookings/new?listingId=${listing.id}`}
+          className="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Request Booking
+        </Link>
+      </div>
     </Container>
   );
 };
