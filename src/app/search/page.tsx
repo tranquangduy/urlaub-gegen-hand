@@ -14,6 +14,7 @@ import SearchForm from '@/components/search/SearchForm';
 import SearchResults from '@/components/search/SearchResults';
 import LoadingSkeleton from '@/components/search/LoadingSkeleton';
 import { parseISO, isWithinInterval, compareAsc } from 'date-fns';
+import { FilterTags } from '@/components/search/FilterTags';
 
 // Placeholder for Container
 const TempContainer = ({ children }: { children: React.ReactNode }) => (
@@ -231,15 +232,57 @@ function SearchPageContent() {
     handleSearch({ page: newPage });
   };
 
+  // Compute active filters from currentParams, excluding pagination
+  const activeFilters = useMemo(() => {
+    const filters: Record<string, string | number | string[]> = {};
+    if (currentParams.location) filters.location = currentParams.location;
+    if (currentParams.startDate) filters.startDate = currentParams.startDate;
+    if (currentParams.endDate) filters.endDate = currentParams.endDate;
+    if (currentParams.category) filters.category = currentParams.category;
+    if (currentParams.languages && currentParams.languages.length > 0)
+      filters.languages = currentParams.languages;
+    if (currentParams.minHours !== undefined)
+      filters.minHours = currentParams.minHours;
+    if (currentParams.maxHours !== undefined)
+      filters.maxHours = currentParams.maxHours;
+    return filters;
+  }, [currentParams]);
+
+  // Handler to remove individual filters or clear all
+  const handleRemoveFilter = useCallback(
+    (key: string, value?: string) => {
+      if (key === 'all') {
+        // Clear all filters
+        handleSearch({
+          location: undefined,
+          startDate: undefined,
+          endDate: undefined,
+          category: undefined,
+          languages: undefined,
+          minHours: undefined,
+          maxHours: undefined,
+        });
+      } else if (key === 'languages' && value) {
+        const newLangs =
+          currentParams.languages?.filter((l) => l !== value) || [];
+        handleSearch({ languages: newLangs.length > 0 ? newLangs : undefined });
+      } else {
+        // Remove single filter
+        handleSearch({ [key]: undefined });
+      }
+    },
+    [handleSearch, currentParams.languages]
+  );
+
   return (
     <TempContainer>
       <h1 className="text-3xl font-bold mb-6">Find Your Next Opportunity</h1>
       <div className="mb-8">
         {/* Pass currentParams to keep form in sync with URL */}
         <SearchForm initialParams={currentParams} onSearch={handleSearch} />
+        {/* Display active filter tags */}
+        <FilterTags filters={activeFilters} onRemove={handleRemoveFilter} />
       </div>
-
-      {/* TODO: Add Filter Tags display here? */}
 
       {loading ? (
         <LoadingSkeleton count={ITEMS_PER_PAGE} />
