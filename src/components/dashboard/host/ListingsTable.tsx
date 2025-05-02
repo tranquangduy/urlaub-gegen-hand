@@ -35,43 +35,47 @@ const ListingsTable: React.FC<ListingsTableProps> = ({
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Title</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Created</TableHead>
-          {/* <TableHead>Views</TableHead> */}{' '}
-          {/* Placeholder for future analytics */}
-          {/* <TableHead>Applications</TableHead> */}
-          <TableHead className="text-right">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {listings.map((listing) => (
-          <TableRow key={listing.id}>
-            <TableCell className="font-medium">{listing.title}</TableCell>
-            <TableCell>
-              <Badge
-                variant={listing.status === 'active' ? 'default' : 'secondary'}
-              >
-                {listing.status === 'active' ? 'Active' : 'Inactive'}
-              </Badge>
-            </TableCell>
-            <TableCell>{format(new Date(listing.createdAt), 'PP')}</TableCell>
-            {/* <TableCell>0</TableCell> */}
-            {/* <TableCell>0</TableCell> */}
-            <TableCell className="text-right">
-              <ListingActions
-                listing={listing}
-                onStatusChange={onStatusChange}
-                onDelete={onDelete}
-              />
-            </TableCell>
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Title</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Created</TableHead>
+            {/* <TableHead>Views</TableHead> */}{' '}
+            {/* Placeholder for future analytics */}
+            {/* <TableHead>Applications</TableHead> */}
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {listings.map((listing) => (
+            <TableRow key={listing.id}>
+              <TableCell className="font-medium">{listing.title}</TableCell>
+              <TableCell>
+                <Badge
+                  variant={
+                    listing.status === 'active' ? 'default' : 'secondary'
+                  }
+                >
+                  {listing.status === 'active' ? 'Active' : 'Inactive'}
+                </Badge>
+              </TableCell>
+              <TableCell>{format(new Date(listing.createdAt), 'PP')}</TableCell>
+              {/* <TableCell>0</TableCell> */}
+              {/* <TableCell>0</TableCell> */}
+              <TableCell className="text-right">
+                <ListingActions
+                  listing={listing}
+                  onStatusChange={onStatusChange}
+                  onDelete={onDelete}
+                />
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 };
 

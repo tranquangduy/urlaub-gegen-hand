@@ -16,6 +16,7 @@ import {
   DrawerClose,
 } from '@/components/ui/drawer';
 import { Menu } from 'lucide-react';
+import NotificationCenter from '@/components/dashboard/common/NotificationCenter';
 
 const navItems = [
   { title: 'Home', href: '/' },
@@ -32,8 +33,8 @@ const Navbar: React.FC = () => {
         <Link href="/" className="text-xl font-bold">
           UrlaubGegenHand
         </Link>
-        {/* Desktop Navigation */}
-        <nav className="hidden md:block">
+        {/* Desktop Navigation with Notifications */}
+        <div className="hidden md:flex items-center space-x-4">
           <NavigationMenu>
             <NavigationMenuList>
               {navItems.map((item) => (
@@ -48,9 +49,12 @@ const Navbar: React.FC = () => {
               ))}
             </NavigationMenuList>
           </NavigationMenu>
-        </nav>
-        {/* Mobile Navigation Drawer */}
-        <div className="md:hidden">
+          <NotificationCenter />
+        </div>
+        {/* Mobile Navigation Drawer and Notifications */}
+        <div className="md:hidden flex items-center space-x-2">
+          {/* Notification trigger on mobile */}
+          <NotificationCenter />
           <Drawer>
             <DrawerTrigger asChild>
               <button aria-label="Open menu">

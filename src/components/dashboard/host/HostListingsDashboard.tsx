@@ -14,6 +14,14 @@ import { PlusCircle } from 'lucide-react';
 import { toast } from 'sonner'; // Assuming sonner for notifications
 import StatsCard from '@/components/dashboard/common/StatsCard';
 import { List, Eye, EyeOff } from 'lucide-react';
+import {
+  useNotifications,
+  NotificationType,
+} from '@/contexts/NotificationContext';
+import { v4 as uuidv4 } from 'uuid';
+import ActivityFeed from '@/components/dashboard/common/ActivityFeed';
+import { mockActivities } from '@/mocks/activities';
+import LoadingSkeleton from '@/components/search/LoadingSkeleton';
 
 interface HostListingsDashboardProps {
   hostId: string;
@@ -22,6 +30,7 @@ interface HostListingsDashboardProps {
 const HostListingsDashboard: React.FC<HostListingsDashboardProps> = ({
   hostId,
 }) => {
+  const { addNotification } = useNotifications();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -73,6 +82,16 @@ const HostListingsDashboard: React.FC<HostListingsDashboardProps> = ({
         toast.success(
           `Listing ${newStatus === 'active' ? 'activated' : 'deactivated'}.`
         );
+        addNotification({
+          id: uuidv4(),
+          type: NotificationType.SUCCESS,
+          message: `Listing ${
+            newStatus === 'active' ? 'activated' : 'deactivated'
+          }.`,
+          timestamp: new Date(),
+          read: false,
+          link: '/dashboard/host/listings',
+        });
       } else {
         throw new Error('Failed to update listing status.');
       }
@@ -90,6 +109,14 @@ const HostListingsDashboard: React.FC<HostListingsDashboardProps> = ({
           prevListings.filter((l) => l.id !== listingId)
         );
         toast.success('Listing deleted successfully.');
+        addNotification({
+          id: uuidv4(),
+          type: NotificationType.SUCCESS,
+          message: 'Listing deleted successfully.',
+          timestamp: new Date(),
+          read: false,
+          link: '/dashboard/host/listings',
+        });
       } else {
         throw new Error('Failed to delete listing.');
       }
@@ -109,8 +136,11 @@ const HostListingsDashboard: React.FC<HostListingsDashboardProps> = ({
     totalCount > 0 ? Math.round((inactiveCount / totalCount) * 100) : 0;
 
   if (loading) {
-    // TODO: Add listings table skeleton loader
-    return <p>Loading listings...</p>;
+    return (
+      <div className="space-y-6">
+        <LoadingSkeleton count={5} />
+      </div>
+    );
   }
 
   if (error) {
@@ -137,6 +167,14 @@ const HostListingsDashboard: React.FC<HostListingsDashboardProps> = ({
           trendValue={inactivePercent}
         />
       </div>
+      {/* Recent activity feed */}
+      <ActivityFeed
+        activities={mockActivities.map((a) => ({
+          ...a,
+          timestamp: a.timestamp.toISOString(),
+        }))}
+        limit={5}
+      />
       <div className="flex justify-end">
         <Button asChild>
           <Link href="/listings/new">
