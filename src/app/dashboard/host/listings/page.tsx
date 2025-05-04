@@ -16,7 +16,7 @@ const HostListingsPage = () => {
 
   React.useEffect(() => {
     // Redirect if not loading and user is not a host
-    if (!isLoading && (!user || !user.roles.includes('host'))) {
+    if (!isLoading && (!user || !user?.roles?.includes('host'))) {
       // Redirect to login or home page
       router.push('/');
     }
@@ -31,7 +31,7 @@ const HostListingsPage = () => {
     );
   }
 
-  if (!user || !user.roles.includes('host')) {
+  if (!user || !user?.roles?.includes('host')) {
     // Should be redirected, but show message just in case
     return (
       <TempContainer>

@@ -1,4 +1,4 @@
-import { NotificationType } from '@/contexts/NotificationContext';
+import type { NotificationType } from '@/contexts/NotificationContext';
 
 export interface MockNotification {
   id: string;
@@ -12,7 +12,7 @@ export interface MockNotification {
 export const mockNotifications: MockNotification[] = [
   {
     id: '1',
-    type: NotificationType.INFO,
+    type: 'INFO' as NotificationType,
     message: 'Welcome! Your host dashboard is ready.',
     timestamp: new Date(),
     read: false,
@@ -20,7 +20,7 @@ export const mockNotifications: MockNotification[] = [
   },
   {
     id: '2',
-    type: NotificationType.SUCCESS,
+    type: 'SUCCESS' as NotificationType,
     message: 'You have a new booking request.',
     timestamp: new Date(Date.now() - 1000 * 60 * 60),
     read: false,
@@ -28,10 +28,17 @@ export const mockNotifications: MockNotification[] = [
   },
   {
     id: '3',
-    type: NotificationType.WARNING,
+    type: 'WARNING' as NotificationType,
     message: 'Your profile is incomplete.',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
     read: true,
     link: '/profile',
+  },
+  {
+    id: '4',
+    type: 'ERROR' as NotificationType,
+    message: 'Failed to load initial data.',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 3),
+    read: false,
   },
 ];

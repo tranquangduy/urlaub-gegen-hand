@@ -1,3 +1,4 @@
+'use client';
 import React, { createContext, useReducer, useContext, ReactNode } from 'react';
 import { mockNotifications } from '@/mocks/notifications';
 

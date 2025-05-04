@@ -80,27 +80,27 @@ export default function ListingForm({ listingId }: ListingFormProps) {
   }, [isEditing, editListingId]);
 
   // Load draft from localStorage on mount (only if NOT editing or after initial load)
-  useEffect(() => {
-    if (!isEditing || !initialLoading) {
-      // Load draft for new or after initial edit load finishes
-      const draft = localStorage.getItem(localStorageKey);
-      if (draft) {
-        try {
-          const parsedDraft = JSON.parse(draft);
-          // Only set draft if it differs from initially loaded data (or if creating new)
-          if (
-            !isEditing ||
-            JSON.stringify(parsedDraft) !== JSON.stringify(formData)
-          ) {
-            setFormData(parsedDraft);
-          }
-        } catch (err) {
-          console.error('Error parsing listing draft:', err);
-          localStorage.removeItem(localStorageKey);
-        }
-      }
-    }
-  }, [isEditing, initialLoading, localStorageKey, formData]); // Add formData dependency
+  // useEffect(() => {
+  //   if (!isEditing || !initialLoading) {
+  //     // Load draft for new or after initial edit load finishes
+  //     const draft = localStorage.getItem(localStorageKey);
+  //     if (draft) {
+  //       try {
+  //         const parsedDraft = JSON.parse(draft);
+  //         // Only set draft if it differs from initially loaded data (or if creating new)
+  //         if (
+  //           !isEditing ||
+  //           JSON.stringify(parsedDraft) !== JSON.stringify(formData)
+  //         ) {
+  //           setFormData(parsedDraft);
+  //         }
+  //       } catch (err) {
+  //         console.error('Error parsing listing draft:', err);
+  //         localStorage.removeItem(localStorageKey);
+  //       }
+  //     }
+  //   }
+  // }, [isEditing, initialLoading, localStorageKey, formData]); // Add formData dependency
 
   // Save draft to localStorage on formData change
   useEffect(() => {
